@@ -1,7 +1,4 @@
 #!/bin/sh
-GAME_DIR=/home/steam/Steam/steamapps/common/VRisingDedicatedServer
-SETTINGS_DIR=$GAME_DIR/VRisingServer_Data/StreamingAssets/Settings
-
 onExit() {
     kill -INT -$(ps -A | grep 'VRising' | awk '{print $1}') &>> /saves/wtf
     wait $!
@@ -29,25 +26,15 @@ check_req_vars() {
 
 setServerHostSettings() {
     check_req_vars
-    WRITE_DIR=$SETTINGS_DIR
-
-    # if [ -d "/saves/Settings" ]; then
-    #     WRITE_DIR=/saves/Settings
-    # fi
 
     echo "Using env vars for ServerHostSettings"
-    envsubst < /templates/ServerHostSetting.templ > $WRITE_DIR/ServerHostSettings.json
+    envsubst < /templates/ServerHostSetting.templ > /saves/Settings/ServerHostSettings.json
 }
 
 setServerGameSettings() {
-    WRITE_DIR=$SETTINGS_DIR
-
-    # if [ -d "/saves/Settings" ]; then
-    #     WRITE_DIR=/saves/Settings
-    # fi
 
     echo "Using env vars for ServerGameSettings"
-    envsubst < /templates/ServerGameSettings.templ > $WRITE_DIR/ServerGameSettings.json
+    envsubst < /templates/ServerGameSettings.templ > /saves/Settings/ServerGameSettings.json
 }
 
 createSettingsSaves() {
@@ -59,13 +46,7 @@ createSettingsSaves() {
 # This logic is flawed and I don't have the energy to fix this
 checkGameSettings() {
     if [ ! -f "/saves/Settings/ServerGameSettings.json" ]; then
-        # necessary for backwards compatabiltiy
-        if [ -f "/var/settings/ServerGameSettings.json" ]; then
-            createSettingsSaves
-            cp /var/settings/ServerGameSettings.json /saves/Settings/ServerGameSettings.json
-        else
-            setServerGameSettings
-        fi
+        setServerGameSettings
     else
         echo "Using /saves/Settings/ServerGameSettings.json for settings"
     fi
@@ -74,40 +55,16 @@ checkGameSettings() {
 # This logic is flawed and I don't have the energy to fix this
 checkHostSettings() {
     if [ ! -f "/saves/Settings/ServerHostSettings.json" ]; then
-        # necessary for backwards compatabiltiy
-        if [ -f "/var/settings/ServerHostSettings.json" ]; then
-            createSettingsSaves
-            cp /var/settings/ServerHostSettings.json /saves/Settings/ServerHostSettings.json
-            checkGameSettings
-        else
-            check_req_vars
-            setServerHostSettings
-        fi
+        check_req_vars
+        setServerHostSettings
     else
         echo "Using /saves/Settings/ServerHostSettings.json for settings"
     fi
 }
 
-createAdminBanListLink() {
-    mkdir -p /saves/Settings
-    
-    if [ ! -f "/saves/Settings/adminlist.txt" ]; then
-        cp $SETTINGS_DIR/adminlist.txt /saves/Settings/adminlist.txt
-    fi
-    if [ ! -f "/saves/Settings/banlist.txt" ]; then
-        cp $SETTINGS_DIR/banlist.txt /saves/Settings/banlist.txt
-    fi
-    rm $SETTINGS_DIR/adminlist.txt
-    rm $SETTINGS_DIR/banlist.txt
-    
-    ln -s /saves/Settings/adminlist.txt $SETTINGS_DIR/adminlist.txt
-    ln -s /saves/Settings/banlist.txt $SETTINGS_DIR/banlist.txt
-}
-
 ./steamcmd.sh +@sSteamCmdForcePlatformType windows +login anonymous +app_update 1829350 validate +quit
 
 if [ -d "/saves" ]; then
-    createAdminBanListLink
     checkGameSettings
     checkHostSettings
 else
