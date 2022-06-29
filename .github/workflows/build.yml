@@ -24,9 +24,8 @@ jobs:
           username: ${{ secrets.DOCKER_LOGIN }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Set outputs
-        id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Add SHORT_SHA env property with commit short sha
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v3
@@ -34,4 +33,4 @@ jobs:
           push: true
           tags: |
             saltydk/v-rising:latest
-            saltydk/v-rising:${{ steps.vars.outputs.sha_short }}
+            saltydk/v-rising:${{ env.SHORT_SHA }}
