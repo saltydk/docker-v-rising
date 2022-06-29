@@ -34,3 +34,5 @@ jobs:
           tags: |
             saltydk/v-rising:latest
             saltydk/v-rising:${{ env.SHORT_SHA }}
+          cache-from: type=registry,ref=saltydk/v-rising:buildcache
+          cache-to: type=registry,ref=saltydk/v-rising:buildcache,mode=max
