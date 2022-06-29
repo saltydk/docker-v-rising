@@ -37,12 +37,6 @@ setServerGameSettings() {
     envsubst < /templates/ServerGameSettings.templ > /saves/Settings/ServerGameSettings.json
 }
 
-createSettingsSaves() {
-    if [ ! -d "/saves/Settings" ]; then
-        mkdir /saves/Settings
-    fi
-}
-
 # This logic is flawed and I don't have the energy to fix this
 checkGameSettings() {
     if [ ! -f "/saves/Settings/ServerGameSettings.json" ]; then
@@ -64,13 +58,12 @@ checkHostSettings() {
 
 ./steamcmd.sh +@sSteamCmdForcePlatformType windows +login anonymous +app_update 1829350 validate +quit
 
-if [ -d "/saves" ]; then
-    checkGameSettings
-    checkHostSettings
-else
-    setServerGameSettings
-    setServerHostSettings
+if [ ! -d "/saves/Settings" ]; then
+    mkdir /saves/Settings
 fi
+
+checkGameSettings
+checkHostSettings
 
 trap onExit INT TERM KILL
 
