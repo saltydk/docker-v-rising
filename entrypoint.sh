@@ -67,7 +67,7 @@ checkHostSettings
 
 trap onExit INT TERM KILL
 
-cd $GAME_DIR
+cd /home/steam/Steam/steamapps/common/VRisingDedicatedServer
 Xvfb :0 -screen 0 1024x768x16 &
 setsid '/launch_server.sh' &
 
